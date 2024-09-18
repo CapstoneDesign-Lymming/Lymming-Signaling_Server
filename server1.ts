@@ -30,7 +30,6 @@ io.on('connection',(socket:any)=>{
         if(!data?.room) return;
 
         socket.join(data.room);
-
         if(!totalRooms[data.room]){
             totalRooms[data.room]= {users:[]};
         }
@@ -42,24 +41,27 @@ io.on('connection',(socket:any)=>{
     });
 
     socket.on('offer', (data:{sdp:string; room:string})=>{
-        socket.io(data.room).emit('offer', {sdp:data.sdp, sender:socket.id});
+        console.log("offer")
+        socket.to(data.room).emit('offer', {sdp:data.sdp, sender:socket.id});
     });
     
     socket.on('answer', (data:{sdp:string; room:string})=>{
+        console.log("answer");
         socket.to(data.room).emit('answer', {sdp:data.sdp,sender:socket.id});
     });
 
-    socket.on('candidaate', (data:{candidate:string; room:string})=>{
-        socket.to(data.room).emit('candidate',{canadidate: data.candidate, sender:socket.id});
+    socket.on('candidate', (data:{candidate:string; room:string})=>{
+        console.log("candidate");
+        socket.to(data.room).emit('candidate',{candidate: data.candidate, sender:socket.id});
     });
 
-    socket.on('disconnct',()=>{
+    socket.on('disconnect',()=>{
         if(socket.room && totalRooms[socket.room]){
             totalRooms[socket.room].users= totalRooms[socket.room].users.filter(
                 (id)=>id!==socket.id
             );
         }
-        if(totalRooms[socket.room].users.length===0){
+        if(totalRooms[socket.room] &&totalRooms[socket.room].users.length===0){
             delete totalRooms[socket.room]
         }
         console.log('Client disconnected');

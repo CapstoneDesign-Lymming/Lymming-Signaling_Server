@@ -35,19 +35,22 @@ io.on('connection', function (socket) {
         console.log("Join room ".concat(data.room, ". Socket ").concat(socket.id));
     });
     socket.on('offer', function (data) {
-        socket.io(data.room).emit('offer', { sdp: data.sdp, sender: socket.id });
+        console.log("offer");
+        socket.to(data.room).emit('offer', { sdp: data.sdp, sender: socket.id });
     });
     socket.on('answer', function (data) {
+        console.log("answer");
         socket.to(data.room).emit('answer', { sdp: data.sdp, sender: socket.id });
     });
-    socket.on('candidaate', function (data) {
-        socket.to(data.room).emit('candidate', { canadidate: data.candidate, sender: socket.id });
+    socket.on('candidate', function (data) {
+        console.log("candidate");
+        socket.to(data.room).emit('candidate', { candidate: data.candidate, sender: socket.id });
     });
-    socket.on('disconnct', function () {
+    socket.on('disconnect', function () {
         if (socket.room && totalRooms[socket.room]) {
             totalRooms[socket.room].users = totalRooms[socket.room].users.filter(function (id) { return id !== socket.id; });
         }
-        if (totalRooms[socket.room].users.length === 0) {
+        if (totalRooms[socket.room] && totalRooms[socket.room].users.length === 0) {
             delete totalRooms[socket.room];
         }
         console.log('Client disconnected');
