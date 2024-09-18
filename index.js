@@ -13,10 +13,19 @@
 const express=require('express');
 const http = require('http');
 const socketIo=require('socket.io');
+const cors= require('cors');
 
-const app=express();
+const app= express();
+app.use(cors());
+
 const server=http.createServer(app);
-const io=socketIo(server);
+const io= socketIo(server,{
+    cors:{
+        origin: "http://localhost:5173", // 요청을 허용할 도메인
+        methods: ["GET", "POST"],
+        credentials: true,
+    }
+})
 
 let users={};
 let socketToRoom={};
