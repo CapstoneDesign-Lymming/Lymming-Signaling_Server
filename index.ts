@@ -61,7 +61,10 @@ io.on('connection',(socket:any)=>{
         socket.to(room).emit('screenSharing',{isScreenSharing,sender:socket.id})
     }
     )
-
+    socket.on('callEnded', (msg) => {
+        socket.to(msg.room).emit('callEnded');
+    });
+    
     socket.on('disconnect',()=>{
         if(socket.room && totalRooms[socket.room]){
             totalRooms[socket.room].users= totalRooms[socket.room].users.filter(
