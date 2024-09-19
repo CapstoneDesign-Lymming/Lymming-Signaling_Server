@@ -55,6 +55,13 @@ io.on('connection',(socket:any)=>{
         socket.to(data.room).emit('candidate',{candidate: data.candidate, sender:socket.id});
     });
 
+    socket.on('screenSharing',(data)=>{
+        const {room,isScreenSharing}=data;
+        console.log(`방 ${room}에서 화면공유상태: ${isScreenSharing}`)
+        socket.to(room).emit('screenSharing',{isScreenSharing,sender:socket.id})
+    }
+    )
+
     socket.on('disconnect',()=>{
         if(socket.room && totalRooms[socket.room]){
             totalRooms[socket.room].users= totalRooms[socket.room].users.filter(

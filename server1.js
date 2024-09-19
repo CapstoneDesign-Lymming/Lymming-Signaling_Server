@@ -46,6 +46,11 @@ io.on('connection', function (socket) {
         console.log("candidate");
         socket.to(data.room).emit('candidate', { candidate: data.candidate, sender: socket.id });
     });
+    socket.on('screenSharing', function (data) {
+        var room = data.room, isScreenSharing = data.isScreenSharing;
+        console.log("\uBC29 ".concat(room, "\uC5D0\uC11C \uD654\uBA74\uACF5\uC720\uC0C1\uD0DC: ").concat(isScreenSharing));
+        socket.to(room).emit('screenSharing', { isScreenSharing: isScreenSharing, sender: socket.id });
+    });
     socket.on('disconnect', function () {
         if (socket.room && totalRooms[socket.room]) {
             totalRooms[socket.room].users = totalRooms[socket.room].users.filter(function (id) { return id !== socket.id; });
