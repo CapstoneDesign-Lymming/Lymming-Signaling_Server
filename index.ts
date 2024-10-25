@@ -21,7 +21,7 @@ const io = socketIo(server,{
         origin:true
     }
 });
-const totalRooms= {} as {[key:string]:{users:string[]}};
+const totalRooms= {} as {[key:string]:{users:string[],ready:Set<string>}};
 
 io.on('connection',(socket:any)=>{
     console.log(`Client connected. socket: ${socket.id}`);
@@ -31,7 +31,7 @@ io.on('connection',(socket:any)=>{
 
         socket.join(data.room);
         if(!totalRooms[data.room]){
-            totalRooms[data.room]= {users:[]};
+            totalRooms[data.room]= {users:[],ready: new Set()};
         }
 
         totalRooms[data.room].users.push(socket.id);
@@ -40,11 +40,27 @@ io.on('connection',(socket:any)=>{
         console.log(`Join room ${data.room}. Socket ${socket.id}`);
     });
 
+    socket.on('ready',()=>{
+        const room = socket.room;
+        if(!room || !totalRooms[room])return;
+
+        //사용자 ready상태에 추가
+        totalRooms[room].ready.add(socket.id);
+        console.log(`Socket ${socket.id}is ready in room ${room}`);
+    
+        //모든 사용자 ready 상태인지 확인
+        if(totalRooms[room].ready.size === totalRooms[room].users.length){
+            console.log(`#All users in room ${room} are ready`);
+            //모든 사용자 ready상태일 경우 allReady상태 전송
+            io.to(room).emit('allReady');
+        }
+    });
+
     socket.on('offer', (data:{sdp:string; room:string})=>{
         console.log("offer")
         socket.to(data.room).emit('offer', {sdp:data.sdp, sender:socket.id});
     });
-    
+
     socket.on('answer', (data:{sdp:string; room:string})=>{
         console.log("answer");
         socket.to(data.room).emit('answer', {sdp:data.sdp,sender:socket.id});
@@ -59,8 +75,8 @@ io.on('connection',(socket:any)=>{
         const {room,isScreenSharing}=data;
         console.log(`방 ${room}에서 화면공유상태: ${isScreenSharing}`)
         socket.to(room).emit('screenSharing',{isScreenSharing,sender:socket.id})
-    }
-    )
+    });
+
     socket.on('callEnded', (msg) => {
         socket.to(msg.room).emit('callEnded');
     });
