@@ -28,11 +28,25 @@ io.on('connection', function (socket) {
             return;
         socket.join(data.room);
         if (!totalRooms[data.room]) {
-            totalRooms[data.room] = { users: [] };
+            totalRooms[data.room] = { users: [], ready: new Set() };
         }
         totalRooms[data.room].users.push(socket.id);
         socket.room = data.room;
         console.log("Join room ".concat(data.room, ". Socket ").concat(socket.id));
+    });
+    socket.on('ready', function () {
+        var room = socket.room;
+        if (!room || !totalRooms[room])
+            return;
+        //사용자 ready상태에 추가
+        totalRooms[room].ready.add(socket.id);
+        console.log("Socket ".concat(socket.id, "is ready in room ").concat(room));
+        //모든 사용자 ready 상태인지 확인
+        if (totalRooms[room].ready.size === totalRooms[room].users.length) {
+            console.log("#All users in room ".concat(room, " are ready"));
+            //모든 사용자 ready상태일 경우 allReady상태 전송
+            io.to(room).emit('allReady');
+        }
     });
     socket.on('offer', function (data) {
         console.log("offer");
