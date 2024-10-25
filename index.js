@@ -42,7 +42,8 @@ io.on('connection', function (socket) {
         totalRooms[room].ready.add(socket.id);
         console.log("Socket ".concat(socket.id, "is ready in room ").concat(room));
         //모든 사용자 ready 상태인지 확인
-        if (totalRooms[room].ready.size === totalRooms[room].users.length) {
+        if (totalRooms[room].ready.size === 2) {
+            console.log(totalRooms[room]);
             console.log("#All users in room ".concat(room, " are ready"));
             //모든 사용자 ready상태일 경우 allReady상태 전송
             io.to(room).emit('allReady');
