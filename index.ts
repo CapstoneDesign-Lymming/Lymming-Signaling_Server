@@ -47,7 +47,9 @@ io.on('connection',(socket:any)=>{
         //사용자 ready상태에 추가
         totalRooms[room].ready.add(socket.id);
         console.log(`Socket ${socket.id}is ready in room ${room}`);
-    
+        console.log(`${totalRooms[room].users}`);
+        console.log("룸 크기",totalRooms[room].ready.size)
+        console.log("----end ready log----");
         //모든 사용자 ready 상태인지 확인
         if(totalRooms[room].ready.size === 2){
             console.log(totalRooms[room]);
@@ -87,11 +89,25 @@ io.on('connection',(socket:any)=>{
             totalRooms[socket.room].users= totalRooms[socket.room].users.filter(
                 (id)=>id!==socket.id
             );
+            totalRooms[socket.room].ready.delete(socket.id);
+
         }
         if(totalRooms[socket.room] &&totalRooms[socket.room].users.length===0){
-            delete totalRooms[socket.room]
+            delete totalRooms[socket.room];
         }
         console.log('Client disconnected');
+    });
+
+    socket.on('toggleMic',(data:{room: string; userId:string; isMicOn:boolean})=>{
+        console.log(`User ${data.userId} toggled mic: ${data.isMicOn}`);
+        socket.to(data.room).emit('toggleMic',{room:data.room, userId: data.userId, isMicOn: data.isMicOn});
+
+    });
+
+    socket.on('toggleVideo',(data:{room: string; userId:string; isVideoOn:boolean})=>{
+        console.log(`User ${data.userId} toggled mic: ${data.isVideoOn}`);
+        socket.to(data.room).emit('toggleVideo',{room:data.room, userId:data.userId, isVideoOn:data.isVideoOn});
+
     });
 });
 

@@ -41,6 +41,9 @@ io.on('connection', function (socket) {
         //사용자 ready상태에 추가
         totalRooms[room].ready.add(socket.id);
         console.log("Socket ".concat(socket.id, "is ready in room ").concat(room));
+        console.log("".concat(totalRooms[room].users));
+        console.log("룸 크기", totalRooms[room].ready.size);
+        console.log("----end ready log----");
         //모든 사용자 ready 상태인지 확인
         if (totalRooms[room].ready.size === 2) {
             console.log(totalRooms[room]);
@@ -72,11 +75,20 @@ io.on('connection', function (socket) {
     socket.on('disconnect', function () {
         if (socket.room && totalRooms[socket.room]) {
             totalRooms[socket.room].users = totalRooms[socket.room].users.filter(function (id) { return id !== socket.id; });
+            totalRooms[socket.room].ready.delete(socket.id);
         }
         if (totalRooms[socket.room] && totalRooms[socket.room].users.length === 0) {
             delete totalRooms[socket.room];
         }
         console.log('Client disconnected');
+    });
+    socket.on('toggleMic', function (data) {
+        console.log("User ".concat(data.userId, " toggled mic: ").concat(data.isMicOn));
+        socket.to(data.room).emit('toggleMic', { room: data.room, userId: data.userId, isMicOn: data.isMicOn });
+    });
+    socket.on('toggleVideo', function (data) {
+        console.log("User ".concat(data.userId, " toggled mic: ").concat(data.isVideoOn));
+        socket.to(data.room).emit('toggleVideo', { room: data.room, userId: data.userId, isVideoOn: data.isVideoOn });
     });
 });
 server.listen(8080, function () {
