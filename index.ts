@@ -44,7 +44,8 @@ io.on('connection',(socket:any)=>{
         const room = socket.room;
         if(!room || !totalRooms[room])return;
 
-        //사용자 ready상태에 추가
+        //사용자 ready 상태에 추가
+        //!
         totalRooms[room].ready.add(socket.id);
         console.log(`Socket ${socket.id}is ready in room ${room}`);
         console.log(`${totalRooms[room].users}`);
