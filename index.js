@@ -10,20 +10,21 @@
  *
  * offer와 answer 단계엥서는 peeer의 네ㅡ워크 및 미디어 설정을 dsp포맷으로 주고 받음
  */
-var express = require('express');
-var http = require('http');
-var socketIo = require('socket.io');
+var express = require("express");
+var http = require("http");
+var socketIo = require("socket.io");
 var app = express();
 var server = http.createServer(app);
 var io = socketIo(server, {
     cors: {
-        origin: true
-    }
+        origin: "https://lymming.link/", // 실제 프론트엔드 주소로 변경하세요
+        methods: ["GET", "POST"],
+    },
 });
 var totalRooms = {};
-io.on('connection', function (socket) {
+io.on("connection", function (socket) {
     console.log("Client connected. socket: ".concat(socket.id));
-    socket.on('join', function (data) {
+    socket.on("join", function (data) {
         if (!(data === null || data === void 0 ? void 0 : data.room))
             return;
         socket.join(data.room);
@@ -34,11 +35,12 @@ io.on('connection', function (socket) {
         socket.room = data.room;
         console.log("Join room ".concat(data.room, ". Socket ").concat(socket.id));
     });
-    socket.on('ready', function () {
+    socket.on("ready", function () {
         var room = socket.room;
         if (!room || !totalRooms[room])
             return;
-        //사용자 ready상태에 추가
+        //사용자 ready 상태에 추가
+        //!
         totalRooms[room].ready.add(socket.id);
         console.log("Socket ".concat(socket.id, "is ready in room ").concat(room));
         console.log("".concat(totalRooms[room].users));
@@ -49,30 +51,34 @@ io.on('connection', function (socket) {
             console.log(totalRooms[room]);
             console.log("#All users in room ".concat(room, " are ready"));
             //모든 사용자 ready상태일 경우 allReady상태 전송
-            io.to(room).emit('allReady');
+            io.to(room).emit("allReady");
         }
     });
-    socket.on('offer', function (data) {
+    socket.on("offer", function (data) {
         console.log("offer");
-        socket.to(data.room).emit('offer', { sdp: data.sdp, sender: socket.id });
+        socket.to(data.room).emit("offer", { sdp: data.sdp, sender: socket.id });
     });
-    socket.on('answer', function (data) {
+    socket.on("answer", function (data) {
         console.log("answer");
-        socket.to(data.room).emit('answer', { sdp: data.sdp, sender: socket.id });
+        socket.to(data.room).emit("answer", { sdp: data.sdp, sender: socket.id });
     });
-    socket.on('candidate', function (data) {
+    socket.on("candidate", function (data) {
         console.log("candidate");
-        socket.to(data.room).emit('candidate', { candidate: data.candidate, sender: socket.id });
+        socket
+            .to(data.room)
+            .emit("candidate", { candidate: data.candidate, sender: socket.id });
     });
-    socket.on('screenSharing', function (data) {
+    socket.on("screenSharing", function (data) {
         var room = data.room, isScreenSharing = data.isScreenSharing;
         console.log("\uBC29 ".concat(room, "\uC5D0\uC11C \uD654\uBA74\uACF5\uC720\uC0C1\uD0DC: ").concat(isScreenSharing));
-        socket.to(room).emit('screenSharing', { isScreenSharing: isScreenSharing, sender: socket.id });
+        socket
+            .to(room)
+            .emit("screenSharing", { isScreenSharing: isScreenSharing, sender: socket.id });
     });
-    socket.on('callEnded', function (msg) {
-        socket.to(msg.room).emit('callEnded');
+    socket.on("callEnded", function (msg) {
+        socket.to(msg.room).emit("callEnded");
     });
-    socket.on('disconnect', function () {
+    socket.on("disconnect", function () {
         if (socket.room && totalRooms[socket.room]) {
             totalRooms[socket.room].users = totalRooms[socket.room].users.filter(function (id) { return id !== socket.id; });
             totalRooms[socket.room].ready.delete(socket.id);
@@ -80,17 +86,26 @@ io.on('connection', function (socket) {
         if (totalRooms[socket.room] && totalRooms[socket.room].users.length === 0) {
             delete totalRooms[socket.room];
         }
-        console.log('Client disconnected');
+        console.log("Client disconnected");
     });
-    socket.on('toggleMic', function (data) {
+    socket.on("toggleMic", function (data) {
         console.log("User ".concat(data.userId, " toggled mic: ").concat(data.isMicOn));
-        socket.to(data.room).emit('toggleMic', { room: data.room, userId: data.userId, isMicOn: data.isMicOn });
+        socket.to(data.room).emit("toggleMic", {
+            room: data.room,
+            userId: data.userId,
+            isMicOn: data.isMicOn,
+        });
     });
-    socket.on('toggleVideo', function (data) {
+    socket.on("toggleVideo", function (data) {
         console.log("User ".concat(data.userId, " toggled mic: ").concat(data.isVideoOn));
-        socket.to(data.room).emit('toggleVideo', { room: data.room, userId: data.userId, isVideoOn: data.isVideoOn });
+        socket.to(data.room).emit("toggleVideo", {
+            room: data.room,
+            userId: data.userId,
+            isVideoOn: data.isVideoOn,
+        });
     });
 });
-server.listen(8080, function () {
-    console.log('Listening on port 8080');
+var PORT = process.env.PORT || 8008;
+server.listen(PORT, function () {
+    console.log("Listening on por ".concat(PORT, "t"));
 });
