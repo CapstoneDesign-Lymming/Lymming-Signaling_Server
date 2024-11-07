@@ -17,9 +17,9 @@ var app = express();
 var server = http.createServer(app);
 var io = socketIo(server, {
     cors: {
-        origin: "https://lymming.link/", // 실제 프론트엔드 주소로 변경하세요
-        methods: ["GET", "POST"],
-    },
+        origin: "https://lymming.link/",
+        methods: ["GET", "POST"]
+    }
 });
 var totalRooms = {};
 io.on("connection", function (socket) {
@@ -81,7 +81,7 @@ io.on("connection", function (socket) {
     socket.on("disconnect", function () {
         if (socket.room && totalRooms[socket.room]) {
             totalRooms[socket.room].users = totalRooms[socket.room].users.filter(function (id) { return id !== socket.id; });
-            totalRooms[socket.room].ready.delete(socket.id);
+            totalRooms[socket.room].ready["delete"](socket.id);
         }
         if (totalRooms[socket.room] && totalRooms[socket.room].users.length === 0) {
             delete totalRooms[socket.room];
@@ -93,7 +93,7 @@ io.on("connection", function (socket) {
         socket.to(data.room).emit("toggleMic", {
             room: data.room,
             userId: data.userId,
-            isMicOn: data.isMicOn,
+            isMicOn: data.isMicOn
         });
     });
     socket.on("toggleVideo", function (data) {
@@ -101,11 +101,11 @@ io.on("connection", function (socket) {
         socket.to(data.room).emit("toggleVideo", {
             room: data.room,
             userId: data.userId,
-            isVideoOn: data.isVideoOn,
+            isVideoOn: data.isVideoOn
         });
     });
 });
 var PORT = process.env.PORT || 8008;
 server.listen(PORT, function () {
-    console.log("Listening on por ".concat(PORT, "t"));
+    console.log("Listening on port ".concat(PORT));
 });

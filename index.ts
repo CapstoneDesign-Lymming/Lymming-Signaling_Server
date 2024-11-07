@@ -80,15 +80,18 @@ io.on("connection", (socket: any) => {
       .emit("candidate", { candidate: data.candidate, sender: socket.id });
   });
 
-  socket.on("screenSharing", (data) => {
-    const { room, isScreenSharing } = data;
-    console.log(`방 ${room}에서 화면공유상태: ${isScreenSharing}`);
-    socket
-      .to(room)
-      .emit("screenSharing", { isScreenSharing, sender: socket.id });
-  });
+  socket.on(
+    "screenSharing",
+    (data: { room: string; isScreenSharing: boolean }) => {
+      const { room, isScreenSharing } = data;
+      console.log(`방 ${room}에서 화면공유상태: ${isScreenSharing}`);
+      socket
+        .to(room)
+        .emit("screenSharing", { isScreenSharing, sender: socket.id });
+    }
+  );
 
-  socket.on("callEnded", (msg) => {
+  socket.on("callEnded", (msg: { room: string }) => {
     socket.to(msg.room).emit("callEnded");
   });
 
@@ -131,5 +134,5 @@ io.on("connection", (socket: any) => {
 });
 const PORT = process.env.PORT || 8008;
 server.listen(PORT, () => {
-  console.log(`Listening on por ${PORT}t`);
+  console.log(`Listening on port ${PORT}`);
 });
