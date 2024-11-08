@@ -10,6 +10,7 @@
  *
  * offer와 answer 단계엥서는 peeer의 네ㅡ워크 및 미디어 설정을 dsp포맷으로 주고 받음
  */
+import { Request, Response } from "express";
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
@@ -21,6 +22,10 @@ const io = socketIo(server, {
     origin: "https://lymming.link/", // 실제 프론트엔드 주소로 변경하세요
     methods: ["GET", "POST"],
   },
+});
+// "/" 경로 응답 추가
+app.get("/", (req: Request, res: Response) => {
+  res.send("WebRTC signaling server is running.");
 });
 const totalRooms = {} as {
   [key: string]: { users: string[]; ready: Set<string> };
