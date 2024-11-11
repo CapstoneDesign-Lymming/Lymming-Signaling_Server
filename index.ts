@@ -1,4 +1,3 @@
-//https://bluemiv.tistory.com/96 기반으로 작성된 서버 코드
 /**
  * 프로세스
  * connect: peeere와 server가 소켓 연결을 하는 단계
@@ -19,8 +18,10 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "https://lymming.link/", // 실제 프론트엔드 주소로 변경하세요
-    methods: ["GET", "POST"],
+    // origin: "https://lymming.link/",
+    origin: true,
+
+    // methods: ["GET", "POST"],
   },
 });
 // "/" 경로 응답 추가
@@ -69,20 +70,37 @@ io.on("connection", (socket: any) => {
   });
 
   socket.on("offer", (data: { sdp: string; room: string }) => {
-    console.log("offer");
-    socket.to(data.room).emit("offer", { sdp: data.sdp, sender: socket.id });
+    console.log("offer 받음"); //TODO: offer보낼때 sdp와 answer보낼때 sdp보기
+    try {
+      socket.to(data.room).emit("offer", { sdp: data.sdp, sender: socket.id });
+
+      console.log("🔨offer 보냄");
+    } catch (error) {
+      console.log("emit offer error", error);
+    }
   });
 
   socket.on("answer", (data: { sdp: string; room: string }) => {
-    console.log("answer");
-    socket.to(data.room).emit("answer", { sdp: data.sdp, sender: socket.id });
+    console.log("answer 받음");
+    try {
+      //FIXME: answer보냄 안됨
+      socket.to(data.room).emit("answer", { sdp: data.sdp, sender: socket.id });
+      console.log("🚀answer 보냄");
+    } catch (error) {
+      console.log(error);
+    }
   });
 
   socket.on("candidate", (data: { candidate: string; room: string }) => {
     console.log("candidate");
-    socket
-      .to(data.room)
-      .emit("candidate", { candidate: data.candidate, sender: socket.id });
+    try {
+      socket.to(data.room).emit("candidate", {
+        candidate: data.candidate,
+        sender: socket.id,
+      });
+    } catch (error) {
+      console.log("candidate", error);
+    }
   });
 
   socket.on(
@@ -137,7 +155,7 @@ io.on("connection", (socket: any) => {
     }
   );
 });
-const PORT = process.env.PORT || 8008;
+const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
 });
