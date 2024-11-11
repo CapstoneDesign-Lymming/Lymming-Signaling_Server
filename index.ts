@@ -18,13 +18,13 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    // origin: "https://lymming.link/",
-    origin: true,
+    origin: "https://lymming.link/",
+    // origin: true,
 
-    // methods: ["GET", "POST"],
+    methods: ["GET", "POST"],
   },
 });
-// let isAnswerSent = false;
+let isAnswerSent = false;
 
 // "/" 경로 응답 추가
 app.get("/", (req: Request, res: Response) => {
@@ -83,7 +83,7 @@ io.on("connection", (socket: any) => {
   });
 
   socket.on("answer", (data: { sdp: string; room: string }) => {
-    console.log("answer 받음");
+    console.log("answer 받음, answerdata는", data);
     try {
       //FIXME: answer보냄 안됨
       socket.to(data.room).emit("answer", { sdp: data.sdp, sender: socket.id });
