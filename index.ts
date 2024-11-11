@@ -24,6 +24,8 @@ const io = socketIo(server, {
     // methods: ["GET", "POST"],
   },
 });
+// let isAnswerSent = false;
+
 // "/" 경로 응답 추가
 app.get("/", (req: Request, res: Response) => {
   res.send("WebRTC signaling server is running.");
@@ -92,12 +94,13 @@ io.on("connection", (socket: any) => {
   });
 
   socket.on("candidate", (data: { candidate: string; room: string }) => {
-    console.log("candidate");
+    console.log("candidate 받음");
     try {
       socket.to(data.room).emit("candidate", {
         candidate: data.candidate,
         sender: socket.id,
       });
+      console.log("candidate보냄");
     } catch (error) {
       console.log("candidate", error);
     }

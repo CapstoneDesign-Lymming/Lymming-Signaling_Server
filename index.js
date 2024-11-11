@@ -11,6 +11,7 @@ var io = socketIo(server, {
         origin: true
     }
 });
+// let isAnswerSent = false;
 // "/" 경로 응답 추가
 app.get("/", function (req, res) {
     res.send("WebRTC signaling server is running.");
@@ -70,12 +71,13 @@ io.on("connection", function (socket) {
         }
     });
     socket.on("candidate", function (data) {
-        console.log("candidate");
+        console.log("candidate 받음");
         try {
             socket.to(data.room).emit("candidate", {
                 candidate: data.candidate,
                 sender: socket.id
             });
+            console.log("candidate보냄");
         }
         catch (error) {
             console.log("candidate", error);
